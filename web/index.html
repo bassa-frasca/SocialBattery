@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Social Battery — Control</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="bar">
+  <div class="brand">
+    <span class="dot" id="statusDot"></span>
+    <h1>Social Battery</h1>
+  </div>
+  <div class="bar-right">
+    <span class="conn" id="connLabel">simulating</span>
+    <button id="connectBtn" class="btn primary">Connect board</button>
+  </div>
+</header>
+
+<main class="layout">
+
+  <!-- ---------------------------------------------------- live preview -->
+  <section class="panel stage">
+    <svg id="stage" viewBox="0 0 420 560" aria-label="Live preview of the sculpture">
+      <defs>
+        <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stop-color="rgba(255,255,255,.07)"/>
+          <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+        </linearGradient>
+      </defs>
+
+      <rect x="0" y="470" width="420" height="90" fill="url(#floor)"/>
+
+      <!-- Each arm rotates about its own socket. Resting pose (Stop) is drawn
+           perfectly vertical/perpendicular to the base — that's what 0° means for
+           every arm — and the sway rotates out from there. Draw order is back to
+           front, so the longest stand sits behind the shorter two — same stacking
+           as the physical object. -->
+      <g id="arm0" class="arm">
+        <line x1="203" y1="462" x2="203" y2="148" class="rod back"/>
+        <rect x="168" y="82" width="70" height="64" rx="2" class="shape blue"/>
+      </g>
+
+      <g id="arm1" class="arm">
+        <line x1="210" y1="468" x2="210" y2="190" class="rod"/>
+        <polygon points="210,130 242,190 178,190" class="shape yellow"/>
+      </g>
+
+      <g id="arm2" class="arm">
+        <line x1="217" y1="472" x2="217" y2="268" class="rod front"/>
+        <polygon points="245,251 228,268 206,268 189,251 189,229 206,212 228,212 245,229" class="shape red"/>
+      </g>
+
+      <!-- base -->
+      <rect x="168" y="466" width="84" height="40" rx="3" class="base"/>
+      <ellipse cx="210" cy="508" rx="62" ry="11" class="base-plate"/>
+      <g id="leds"></g>
+    </svg>
+
+  </section>
+
+  <!-- ---------------------------------------------------- controls -->
+  <section class="panel controls">
+
+    <div class="block">
+      <div class="block-head">
+        <h2>State</h2>
+        <span class="motor" id="motorLabel">all stopped</span>
+      </div>
+
+      <div class="arm-row all">
+        <span class="arm-id">All arms</span>
+        <div class="seg" data-arm="all">
+          <button data-state="LOW">Low</button>
+          <button data-state="MED">Medium</button>
+          <button data-state="HIGH">High</button>
+        </div>
+        <button class="btn ghost tiny" data-stop="all">Stop</button>
+      </div>
+
+      <!-- one row per arm, built in app.js from ARM_PINS -->
+      <div id="armRows"></div>
+
+      <p class="sim-note" id="simNote">
+        Preview only — the arms above are simulated.
+        Tap <b>Connect board</b> to drive the real servo.
+      </p>
+
+      <p class="hint">Nothing moves until you tap a state. Tapping one starts that arm
+        straight away; tapping another changes its speed and amplitude without it jumping.
+        Arms with no motor wired to them are greyed out once a board is connected. Red has
+        no buttons here at all — a physical dial wired to the board sets its level directly.</p>
+    </div>
+
+    <div class="block log-block">
+      <div class="block-head">
+        <h2>Serial</h2>
+        <button id="clearLog" class="btn ghost tiny">clear</button>
+      </div>
+      <pre id="log" class="log"></pre>
+    </div>
+
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
