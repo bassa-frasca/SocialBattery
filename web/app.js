@@ -221,16 +221,22 @@ async function connect({ auto = false } = {}) {
   if (state.connected || connecting) return;
 
   try {
-    let target = await findKnownPort();
-    let pickedByHand = false;
+    let target = null;
 
-    if (!target) {
-      pickedByHand = true;
-      if (auto) return;               // nothing permitted yet — stay quiet, keep watching
-      log("no board has been granted to this page yet — pick it once and I'll remember it");
+    if (auto) {
+      target = await findKnownPort();
+      if (!target) return;             // nothing permitted yet — stay quiet, keep watching
+    } else {
+      // Manual click: go straight for the chooser, with nothing awaited before it.
+      // requestPort() needs to be handling a real user gesture, and Chrome's idea of
+      // that doesn't survive an await first — even a fast one, like checking whether
+      // a port is already known. (That's not a loss: the auto-reconnect path above
+      // already opens an already-known port without any dialog, on page load and
+      // when a device is plugged in, so by the time someone actually needs to click
+      // this button, there either isn't a known port yet or auto-reconnect already
+      // would have used it.)
+      log("opening the picker — choose the Arduino");
       target = await navigator.serial.requestPort({ filters: PORT_FILTERS });
-    } else if (!auto) {
-      log("found a previously granted Arduino — opening it without asking");
     }
 
     // A port we already hold is already open; opening it again throws and leaves the
@@ -246,28 +252,13 @@ async function connect({ auto = false } = {}) {
 
     let hello = await handshake();
 
-    // A remembered port can go stale: unplug and replug and the board comes back on a
-    // different one, while the old grant lingers in the browser. Opening that gets
-    // silence — so if a port we chose ourselves does not answer, fall back to asking,
-    // rather than reporting "no answer" about a port that is not even the board.
-    if (!hello && !auto && !pickedByHand) {
-      log("that port did not answer — it may be a stale one. Asking you to pick.", "warn");
-      connecting = false;
-      await disconnect({ quiet: true, keepAuto: true });
-      try {
-        port = await navigator.serial.requestPort({ filters: PORT_FILTERS });
-        connecting = true;
-        await port.open({ baudRate: 115200 });
-        writer = port.writable.getWriter();
-        readLoop();
-        setConnUI("checking");
-        hello = await handshake();
-      } catch (err) {
-        log("connect cancelled: " + err.message, "err");
-        await disconnect({ quiet: true, keepAuto: true });
-        return;
-      }
-    }
+    // A remembered port can go stale — unplug and replug and the board comes back on
+    // a different one, while the old grant lingers in the browser — but that's only
+    // possible to hit via the auto-reconnect path now (the manual click above always
+    // goes through the chooser fresh). An auto attempt failing quietly is fine: the
+    // board may just not be plugged in yet, or answering is a moment away after a
+    // reset, and the plain !hello handling below already covers it without opening a
+    // dialog the "never prompts on auto" contract doesn't allow.
 
     if (!hello) {
       log("no answer from that port — nothing identified itself as the board.", "err");
