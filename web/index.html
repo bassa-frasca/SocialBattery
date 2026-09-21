@@ -39,18 +39,24 @@
            front, so the longest stand sits behind the shorter two — same stacking
            as the physical object. -->
       <g id="arm0" class="arm">
-        <line x1="203" y1="462" x2="203" y2="148" class="rod back"/>
-        <rect x="168" y="82" width="70" height="64" rx="2" class="shape blue"/>
+        <line x1="203" y1="462" x2="150" y2="152" class="rod back"/>
+        <polygon points="150,86 185,150 115,150" class="shape blue"/>
       </g>
 
       <g id="arm1" class="arm">
-        <line x1="210" y1="468" x2="210" y2="190" class="rod"/>
-        <polygon points="210,130 242,190 178,190" class="shape yellow"/>
+        <line x1="210" y1="468" x2="266" y2="196" class="rod"/>
+        <circle cx="266" cy="164" r="30" class="shape ring orange"/>
       </g>
 
       <g id="arm2" class="arm">
-        <line x1="217" y1="472" x2="217" y2="268" class="rod front"/>
-        <polygon points="245,251 228,268 206,268 189,251 189,229 206,212 228,212 245,229" class="shape red"/>
+        <line x1="217" y1="472" x2="222" y2="268" class="rod front"/>
+        <!-- a gourd: small upper lobe, fuller lower one, tipped 20 degrees left -->
+        <path class="shape yellow" transform="rotate(-20 222 242)"
+              d="M 222,204
+                 C 237,204 240,219 232,230
+                 C 253,240 257,270 222,274
+                 C 187,270 191,240 212,230
+                 C 204,219 207,204 222,204 Z"/>
       </g>
 
       <!-- base -->
@@ -82,6 +88,8 @@
 
       <!-- one row per arm, built in app.js from ARM_PINS -->
       <div id="armRows"></div>
+
+      <p class="fader-state" id="faderState" hidden></p>
 
       <p class="sim-note" id="simNote">
         Preview only — the arms above are simulated.

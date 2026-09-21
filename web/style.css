@@ -8,6 +8,7 @@
   --blue:#4ba3d3;
   --yellow:#f5c518;
   --red:#a5122e;
+  --orange:#e8762c;
   --ok:#5ad19a;
   --radius:14px;
 }
@@ -80,6 +81,10 @@ body{
 .shape.blue{fill:var(--blue)}
 .shape.yellow{fill:var(--yellow)}
 .shape.red{fill:var(--red)}
+.shape.orange{fill:var(--orange)}
+/* a ring is drawn as an outline, so it needs no fill and a thick stroke */
+.shape.ring{fill:none;stroke-width:13}
+.shape.ring.orange{stroke:var(--orange)}
 .base{fill:#cfc7ba}
 .base-plate{fill:#b8b0a3;opacity:.85}
 
@@ -87,6 +92,7 @@ body{
 .swatch.blue{background:var(--blue)}
 .swatch.yellow{background:var(--yellow)}
 .swatch.red{background:var(--red)}
+.swatch.orange{background:var(--orange)}
 
 /* ---------------------------------------------------------- blocks */
 .block{padding:18px 0;border-bottom:1px solid var(--line)}
@@ -226,3 +232,21 @@ body{
 }
 .log .tx{color:#d8cfc2}
 .log .err{color:#e08a7a}
+
+/* the fader's motor is driving the slider right now */
+.pot-control.seeking .pot-dial{filter:drop-shadow(0 0 6px rgba(90,209,154,.55))}
+.pot-control.seeking .pot-band::after{content:" · driving";color:var(--ok)}
+
+/* live state of the motorized fader, mirrored from the board's own status lines */
+.fader-state{
+  margin:12px 0 0;padding:9px 12px;border-radius:9px;font-size:12.5px;
+  color:var(--muted);background:#151310;border:1px solid var(--line);
+  font-variant-numeric:tabular-nums;
+}
+.fader-state b{font-weight:600;letter-spacing:.04em}
+.fader-state[data-level="OFF"]    b{color:var(--muted)}
+.fader-state[data-level="LOW"]    b{color:#d2714a}
+.fader-state[data-level="MEDIUM"] b{color:var(--yellow)}
+.fader-state[data-level="HIGH"]   b{color:var(--ok)}
+.fader-state[data-level="HIGH"]   {border-color:rgba(90,209,154,.3)}
+.fader-state[hidden]{display:none}
