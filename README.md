@@ -107,16 +107,18 @@ it — see [Open items](#open-items) below.
 
 | driver pin | goes to |
 |---|---|
-| IN1 | **D7** |
+| IN1 | **D4** |
 | IN2 | **D5** |
 | IN3 / IN4 | unused (channel B) |
 | VCC / GND | **external 5V supply**, ground tied to MKR GND |
 
 NeoPixel data → **D1**.
 
-**D4 was IN1's first home but it's also `PIN_SPI_SS` on this board's variant** — a
-servo or motor pin fighting the SPI alias is a subtle failure, so IN1 moved to D7
-rather than working around it.
+**D4 is also `PIN_SPI_SS` on this board's variant** — a known-risky alias (a servo or
+motor pin fighting the SPI alias is a subtle failure), documented here rather than
+avoided, since it's what's actually wired. If the fader ever misbehaves in a way
+power/wiring doesn't explain, suspect this pin first — moving IN1 elsewhere (D7 was
+the previous home) is the way to test whether the symptom follows it.
 
 **Motor power must not come from the MKR.** On the 3.3V pin the fader crawls at
 ~13 counts/sec and repeatedly browns the board off USB; on an external 5V supply it

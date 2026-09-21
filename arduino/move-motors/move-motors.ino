@@ -86,8 +86,10 @@
     VCC MOTOR    (red)    -> driver Motor A / OUT1   (swap with OUT2 to reverse)
     GND MOTOR    (black)  -> driver Motor A / OUT2
     TOUCH SLIDER (orange) -> unconnected, capacitive strip not used yet
-    driver IN1 -> D7,  IN2 -> D5.  D4 was the first choice for IN1 but it's also
-    PIN_SPI_SS on this board's variant — moved off it rather than fight that alias.
+    driver IN1 -> D4,  IN2 -> D5.  D4 is also PIN_SPI_SS on this board's variant —
+    a known-risky alias, documented rather than avoided, since it's what's actually
+    wired. If the fader ever misbehaves in a way power/wiring doesn't explain,
+    suspect this pin first and try moving IN1 elsewhere (D7 was the previous home).
     driver VCC/GND -> EXTERNAL 5V supply, ground tied to MKR GND. Running the driver
     off the MKR's 3.3V pin makes the fader crawl and browns the board off USB.
 
@@ -373,7 +375,13 @@ void updateArms(float dt) {
 // ==========================================================================
 
 // ---- motorized fader + NeoPixel (independent of the arms) -------------------
-#define MOTOR_IN1 7    // HW-354 IN1 - moved off D4, which is also PIN_SPI_SS
+// D4 is also PIN_SPI_SS on this board's variant — a documented reason to avoid it
+// (see the wiring note in the header comment), but it's what's actually wired right
+// now, so that's what this reads. If the fader misbehaves in a way that isn't
+// explained by power/wiring, this alias is the first thing to suspect — move IN1 to
+// a different free PWM pin (D2/D3 are taken by the servos; D7 was the previous home)
+// and see if the symptom follows the pin.
+#define MOTOR_IN1 4    // HW-354 IN1 - shares a pin with PIN_SPI_SS, see above
 #define MOTOR_IN2 5    // HW-354 IN2 (Motor A) - direction + speed
 #define SLIDER_PIN A1  // the fader's wiper
 #define STRIP_PIN 1    // NeoPixel data
