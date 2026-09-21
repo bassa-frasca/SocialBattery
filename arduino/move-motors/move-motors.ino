@@ -496,6 +496,8 @@ int pointB = 0;      // high end
 int targetVal = 0;   // whichever end we are heading for right now
 int lastSliderReading = 0;   // set once per faderUpdate(), so reportFader() below reads
                               // it rather than sampling the ADC a second time per tick
+unsigned long manualDriveUntil = 0;   // faderUpdate() stands down until millis() passes
+                                       // this, while a raw D: test command holds the motor
 
 enum FaderMode { FD_HOMING, FD_SWINGING, FD_GRABBED, FD_IDLE };
 FaderMode faderMode = FD_HOMING;
@@ -683,6 +685,11 @@ void faderSetup() {
 }
 
 void faderUpdate() {
+  // A raw D: test command is in control — stand down entirely rather than merely
+  // switching to FD_IDLE, whose own per-loop behaviour is motorCoast(), which would
+  // silently cancel whatever D: just commanded on the very next loop() iteration.
+  if (millis() < manualDriveUntil) return;
+
   int sliderVal = readSlider();
   lastSliderReading = sliderVal;
 
@@ -1065,12 +1072,13 @@ void handleLine(char *s) {
     return;
   }
 
-  // D:<duty> — drive the fader motor directly, bypassing every bit of logic.
-  // Positive drives forward, negative backward, 0 coasts. Purely a wiring/supply
-  // probe: if this does nothing, the fault is not in the control code.
+  // D:<duty> — drive the fader motor directly, bypassing every bit of logic, for 2
+  // seconds (renewed by each new D: command). Positive drives forward, negative
+  // backward, 0 coasts, 999 brakes. Purely a wiring/supply probe: if this does
+  // nothing, the fault is not in the control code.
   if (kind == 'D' && s[1] == ':') {
     int duty = atoi(s + 2);
-    faderMode = FD_IDLE;                 // stop the fader's own state machine fighting us
+    manualDriveUntil = millis() + 2000;
     if (duty == 999)   motorStop();      // brake: both inputs HIGH, windings shorted
     else if (duty > 0) motorForward(duty > 255 ? 255 : duty);
     else if (duty < 0) motorBackward(-duty > 255 ? 255 : -duty);
